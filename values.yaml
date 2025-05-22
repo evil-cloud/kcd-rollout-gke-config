@@ -143,7 +143,6 @@ podMonitoring:
   - port: http 
     path: /metrics 
     interval: 15s
-    scrapeTimeout: 10s
 # --- Istio Configuration ---
 istio:
   gateway:
