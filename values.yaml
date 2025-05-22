@@ -15,7 +15,7 @@ image:
   repository: d4rkghost47/gitops-api-gke
   pullPolicy: IfNotPresent
   # tag: "3bd8744e"
-  tag: ""
+  tag: "latest"
   # tag: "959a9d97"
   # tag: "364b7bf6"
   # tag: "aacd59e1"
@@ -140,8 +140,8 @@ podDisruptionBudget:
 podMonitoring:
   enabled: true
   endpoints:
-  - port: http 
-    path: /metrics 
+  - port: http
+    path: /metrics
     interval: 15s
 # --- Istio Configuration ---
 istio:
@@ -240,7 +240,6 @@ rollout:
     - analysis:
         templates:
         - templateName: check-jsonplaceholder-api-rate
-
     - setWeight: 10
     - pause:
         duration: 40s
@@ -251,7 +250,6 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
-
     - setWeight: 25
     - pause:
         duration: 40s
@@ -262,7 +260,6 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
-
     - setWeight: 50
     - pause:
         duration: 40s
@@ -276,7 +273,6 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
-            
     - setWeight: 75
     - pause:
         duration: 40s
