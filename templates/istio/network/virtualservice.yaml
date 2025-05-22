@@ -24,12 +24,12 @@ spec:
           host: {{ include "generic-rollout.fullname" $ }}-canary.{{ $.Release.Namespace }}.svc.cluster.local
           port:
             number: {{ $.Values.service.port }}
-        weight: 100
+        weight: 0
       - destination:
           host: {{ include "generic-rollout.fullname" $ }}-stable.{{ $.Release.Namespace }}.svc.cluster.local
           port:
             number: {{ $.Values.service.port }}
-        weight: 0
+        weight: 100
       {{- with .retries }}
       retries:
         {{- toYaml . | nindent 8 }}
