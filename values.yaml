@@ -1,0 +1,294 @@
+# --- Base manifest values ---
+nameOverride: "devops-api"
+fullnameOverride: "devops-api"
+autoscaling:
+  minReplicas: 2
+  maxReplicas: 20
+  targetCPUUtilizationPercentage: 80
+  targetMemoryUtilizationPercentage: 80
+serviceAccount:
+  create: true
+  automount: false
+  annotations:
+    kubernetes.io/automount-service-account-token: "false"
+image:
+  repository: d4rkghost47/gitops-api
+  pullPolicy: IfNotPresent
+  # tag: "3bd8744e"
+  tag: "0bc97648"
+  # tag: "959a9d97"
+  # tag: "364b7bf6"
+  # tag: "aacd59e1"
+imagePullSecrets: []
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "8000"
+  prometheus.io/path: "/metrics"
+  seccomp.security.alpha.kubernetes.io/pod: "runtime/default"
+podLabels: {}
+podSecurityContext:
+  fsGroup: 10001
+  runAsGroup: 3000
+  runAsUser: 10001
+  seccompProfile:
+    type: RuntimeDefault
+  supplementalGroups: [3000]
+  sysctls:
+  - name: net.ipv4.ip_unprivileged_port_start
+    value: "0"
+securityContext:
+  privileged: false
+  procMount: Default
+  runAsNonRoot: true
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  capabilities:
+    drop:
+    - ALL
+    add:
+    - NET_BIND_SERVICE
+  seccompProfile:
+    type: RuntimeDefault
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+  containerPortName: http
+  appProtocol: http
+  sessionAffinity: None
+  publishNotReadyAddresses: false
+  ipFamilyPolicy: SingleStack
+  ipFamilies:
+  - IPv4
+env:
+- name: PYTHONUNBUFFERED
+  value: "1"
+- name: HOME
+  value: "/tmp"
+- name: PYTHONDONTWRITEBYTECODE
+  value: "1"
+- name: TMPDIR
+  value: "/tmp"
+resources:
+  limits:
+    cpu: "100m"
+    memory: "224Mi"
+    ephemeral-storage: "128Mi"
+  requests:
+    cpu: "40m"
+    memory: "128Mi"
+    ephemeral-storage: "32Mi"
+livenessProbe:
+  httpGet:
+    path: /health
+    port: http
+    scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+readinessProbe:
+  httpGet:
+    path: /health
+    port: http
+    scheme: HTTP
+  initialDelaySeconds: 5
+  periodSeconds: 10
+  timeoutSeconds: 3
+  successThreshold: 1
+  failureThreshold: 3
+startupProbe:
+  httpGet:
+    path: /health
+    port: http
+    scheme: HTTP
+  failureThreshold: 6
+  periodSeconds: 5
+lifecycle:
+  preStop:
+    exec:
+      command: ["/bin/sh", "-c", "sleep 10"]
+terminationGracePeriodSeconds: 30
+restartPolicy: Always
+dnsPolicy: ClusterFirst
+dnsConfig:
+  options:
+  - name: ndots
+    value: "5"
+volumes:
+- name: tmp
+  emptyDir:
+    medium: Memory
+    sizeLimit: 28Mi
+- name: cache
+  emptyDir:
+    medium: Memory
+    sizeLimit: 128Mi
+volumeMounts:
+- name: tmp
+  mountPath: /tmp
+  readOnly: false
+- name: cache
+  mountPath: /var/cache
+  readOnly: false
+podDisruptionBudget:
+  enabled: true
+  minAvailable: "50%"
+  unhealthyPodEvictionPolicy: AlwaysAllow
+# --- Pod Monitor Configuration ---
+podMonitoring:
+  enabled: true
+  endpoints:
+  - port: http 
+    path: /metrics 
+    interval: 15s
+    scrapeTimeout: 10s
+# --- Istio Configuration ---
+istio:
+  gateway:
+    enabled: true
+    namespace: istio-gateway
+    selector:
+      istio: gateway
+    servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+      - "*"
+    labels: {}
+    annotations:
+      kubernetes.io/ingress.class: "istio"
+  virtualService:
+    enabled: true
+    hosts:
+    - "*"
+    http:
+    - name: primary
+      match:
+      - uri:
+          prefix: "/"
+      retries:
+        attempts: 3
+        perTryTimeout: 5s
+        retryOn: "gateway-error,connect-failure,refused-stream"
+      timeout: 5s
+      fault:
+        delay:
+          percentage:
+            value: 0.1
+          fixedDelay: 5s
+      corsPolicy:
+        allowOrigins:
+        - exact: "*"
+        allowMethods:
+        - GET
+        allowHeaders:
+        - authorization
+        - content-type
+        maxAge: "24h"
+      headers:
+        response:
+          set:
+            strict-transport-security: "max-age=31536000; includeSubDomains"
+            x-content-type-options: "nosniff"
+            x-frame-options: "DENY"
+  sidecar:
+    enabled: true
+    name: default
+    egress:
+    - hosts:
+      - "./*"
+      - "istio-system/*"
+    outboundTrafficPolicy:
+      mode: REGISTRY_ONLY
+  peerAuthentication:
+    enabled: true
+    name: default
+    mtls:
+      mode: PERMISSIVE
+  externalServices:
+    enabled: true
+    jsonplaceholder:
+      enabled: true
+      name: jsonplaceholder.typicode.com
+      hosts:
+      - "jsonplaceholder.typicode.com"
+      ports:
+      - number: 443
+        name: https
+        protocol: HTTPS
+      resolution: DNS
+      location: MESH_EXTERNAL
+      destinationRule:
+        enabled: true
+        name: jsonplaceholder-dr
+        host: "jsonplaceholder.typicode.com"
+        trafficPolicy:
+          tls:
+            mode: DISABLE
+          loadBalancer:
+            simple: ROUND_ROBIN
+# - Argo Rollouts Configuration ---
+rollout:
+  analysisTemplate:
+    prometheus:
+      address: "http://prometheus-ui.monitoring.svc.cluster.local:9090"
+  spec:
+    steps:
+    - analysis:
+        templates:
+        - templateName: check-jsonplaceholder-api-rate
+
+    - setWeight: 10
+    - pause:
+        duration: 40s
+    - analysis:
+        templates:
+        - templateName: general-success-rate
+        args:
+        - name: rollout-pod-hash
+          valueFrom:
+            podTemplateHashValue: Latest
+
+    - setWeight: 25
+    - pause:
+        duration: 40s
+    - analysis:
+        templates:
+        - templateName: general-success-rate
+        args:
+        - name: rollout-pod-hash
+          valueFrom:
+            podTemplateHashValue: Latest
+
+    - setWeight: 50
+    - pause:
+        duration: 40s
+    - analysis:
+        templates:
+        - templateName: general-success-rate
+        - templateName: external-api-success-rate
+        - templateName: external-api-latency-p95
+        - templateName: circuit-breaker-state
+        args:
+        - name: rollout-pod-hash
+          valueFrom:
+            podTemplateHashValue: Latest
+            
+    - setWeight: 75
+    - pause:
+        duration: 40s
+    - analysis:
+        templates:
+        - templateName: general-success-rate
+        - templateName: external-api-success-rate
+        - templateName: external-api-latency-p95
+        - templateName: circuit-breaker-state
+        args:
+        - name: rollout-pod-hash
+          valueFrom:
+            podTemplateHashValue: Latest
+    - setWeight: 100

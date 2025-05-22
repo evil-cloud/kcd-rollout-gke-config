@@ -1,0 +1,51 @@
+{{- /*
+Note:
+  This NOTES.txt template provides instructions on how to access the application
+  deployed by this Helm chart. It prioritizes access via the configured
+  Istio Gateway and provides a fallback for local testing via port-forwarding
+  to the ClusterIP Service.
+*/}}
+
+Thank you for installing {{ include "generic-rollout.fullname" . }}.
+
+Your application is deployed in the namespace: {{ .Release.Namespace }}
+
+Accessing the application:
+
+{{- if and .Values.istio.enabled .Values.istio.gateway.enabled }}
+1. The application is exposed via the Istio Gateway.
+   The configured host is: **{{ .Values.istio.gateway.host }}**
+
+   To access the application, you typically need to:
+   a. Ensure your Istio ingress gateway is running and accessible externally.
+   b. Configure DNS for the host `{{ .Values.istio.gateway.host }}` to point to the external IP/hostname of your Istio ingress gateway.
+   c. Access the application via your browser or a tool like `curl`:
+      ```bash
+      curl http://{{ .Values.istio.gateway.host }}
+      # If using HTTPS and the gateway is configured for TLS
+      # curl https://{{ .Values.istio.gateway.host }}
+      ```
+
+{{- else if contains "ClusterIP" .Values.service.type }}
+1. The application is deployed as a ClusterIP service.
+   To access the application locally for testing via port-forwarding:
+
+   a. Get the name of a running application pod:
+      ```bash
+      export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "generic-rollout.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+      ```
+   b. Get the container port:
+      ```bash
+      export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+      ```
+   c. Start the port-forwarding session:
+      ```bash
+      echo "Visit [http://127.0.0.1:8080](http://127.0.0.1:8080) to use your application"
+      kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+      ```
+   This will forward traffic from your local machine's port 8080 to the application pod's container port.
+
+{{- else }}
+1. The application Service type is {{ .Values.service.type }}.
+   Please refer to the Kubernetes documentation for accessing services of type {{ .Values.service.type }}.
+{{- end }}

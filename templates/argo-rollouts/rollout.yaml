@@ -1,0 +1,50 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: {{ include "generic-rollout.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ include "generic-rollout.fullname" . }}
+spec:
+  replicas: {{ .Values.autoscaling.minReplicas }}
+  revisionHistoryLimit: 2
+
+  selector:
+    matchLabels:
+      app: {{ include "generic-rollout.fullname" . }}
+
+  workloadRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "generic-rollout.fullname" . }}
+
+  strategy:
+    canary:
+      canaryMetadata:
+        annotations:
+          role: canary
+        labels:
+          role: canary
+          version: canary
+
+      stableMetadata:
+        annotations:
+          role: stable
+        labels:
+          role: stable
+          version: stable
+
+      canaryService: {{ include "generic-rollout.fullname" . }}-canary
+      stableService: {{ include "generic-rollout.fullname" . }}-stable
+      trafficRouting:
+        istio:
+          virtualService:
+            name: {{ include "generic-rollout.fullname" . }}-vsvc
+            routes:
+            {{- range .Values.istio.virtualService.http }}
+            - {{ .name }}
+            {{- end }}
+      {{ with .Values.rollout.spec.steps }}
+      steps:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

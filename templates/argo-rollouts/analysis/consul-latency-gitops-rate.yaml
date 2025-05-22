@@ -1,0 +1,28 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: external-api-latency-p95
+  namespace: {{ .Release.Namespace }}
+spec:
+  args:
+  - name: rollout-pod-hash
+
+  metrics:
+  - name: external-api-latency-p95
+    interval: 20s
+    initialDelay: 10s
+    count: 5
+    successCondition: "result[0] < 1.0"
+    failureLimit: 2
+
+    provider:
+      prometheus:
+        address: "{{ .Values.rollout.analysisTemplate.prometheus.address }}"
+        timeout: 10
+
+        query: |
+          histogram_quantile(0.95, sum(rate(http_client_external_api_request_duration_seconds_bucket{
+            namespace="{{ .Release.Namespace }}",
+            job="{{ include "generic-rollout.fullname" . }}",
+            pod=~".*-{{ "{{" }}args.rollout-pod-hash{{ "}}" }}-[a-z0-9]+",
+          }[1m])) by (le))

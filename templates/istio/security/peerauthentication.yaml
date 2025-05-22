@@ -1,0 +1,15 @@
+{{- if .Values.istio.peerAuthentication.enabled }}
+apiVersion: security.istio.io/v1beta1
+kind: PeerAuthentication
+metadata:
+  name: {{ .Values.istio.peerAuthentication.name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "generic-rollout.labels" . | nindent 4 }}
+    {{- with .Values.istio.peerAuthentication.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  mtls:
+    {{- toYaml .Values.istio.peerAuthentication.mtls | nindent 4 }}
+{{- end }}

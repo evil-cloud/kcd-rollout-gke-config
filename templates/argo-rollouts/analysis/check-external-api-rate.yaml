@@ -1,0 +1,15 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AnalysisTemplate
+metadata:
+  name: check-jsonplaceholder-api-rate
+  namespace: {{ .Release.Namespace }}
+spec:
+  metrics:
+  - name: external-api-metric
+    interval: 2s
+    count: 3
+    failureLimit: 1
+    provider:
+      web:
+        url: "https://jsonplaceholder.typicode.com/todos/1"
+        timeoutSeconds: 5

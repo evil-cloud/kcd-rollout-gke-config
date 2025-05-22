@@ -1,0 +1,18 @@
+{{- if .Values.podMonitoring.enabled }}
+apiVersion: monitoring.googleapis.com/v1
+kind: PodMonitoring
+metadata:
+  name: {{ include "generic-rollout.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "generic-rollout.labels" . | nindent 4 }}
+    {{- with .Values.podMonitoring.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "generic-rollout.name" . }}
+  endpoints:
+    {{- toYaml .Values.podMonitoring.endpoints | nindent 4 }}
+{{- end }}

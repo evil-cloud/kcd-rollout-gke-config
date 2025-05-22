@@ -1,0 +1,20 @@
+{{- if .Values.istio.sidecar.enabled }}
+apiVersion: networking.istio.io/v1alpha3
+kind: Sidecar
+metadata:
+  name: {{ .Values.istio.sidecar.name | default "default" }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "generic-rollout.labels" . | nindent 4 }}
+    {{- with .Values.istio.sidecar.labels }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  workloadSelector:
+    labels:
+      {{- include "generic-rollout.selectorLabels" . | nindent 6 }}
+  egress:
+    {{- toYaml .Values.istio.sidecar.egress | nindent 4 }}
+  outboundTrafficPolicy:
+    {{- toYaml .Values.istio.sidecar.outboundTrafficPolicy | nindent 4 }}
+{{- end }}
