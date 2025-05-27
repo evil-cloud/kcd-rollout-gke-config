@@ -21,12 +21,14 @@ spec:
         {{- toYaml .match | nindent 8 }}
       route:
       - destination:
-          host: {{ include "generic-rollout.fullname" $ }}-canary.{{ $.Release.Namespace }}.svc.cluster.local
+          # host: {{ include "generic-rollout.fullname" $ }}-canary.{{ $.Release.Namespace }}.svc.cluster.local
+          host: {{ include "generic-rollout.fullname" $ }}-canary
           port:
             number: {{ $.Values.service.port }}
         weight: 0
       - destination:
-          host: {{ include "generic-rollout.fullname" $ }}-stable.{{ $.Release.Namespace }}.svc.cluster.local
+          # host: {{ include "generic-rollout.fullname" $ }}-stable.{{ $.Release.Namespace }}.svc.cluster.local
+          host: {{ include "generic-rollout.fullname" $ }}-stable
           port:
             number: {{ $.Values.service.port }}
         weight: 100
