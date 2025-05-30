@@ -6,8 +6,8 @@ metadata:
 spec:
   metrics:
   - name: external-api-metric
-    interval: 2s
-    count: 3
+    interval: 1s
+    count: 1
     failureLimit: 1
     provider:
       web:
