@@ -9,16 +9,15 @@ spec:
 
   metrics:
   - name: external-api-success-rate
-    interval: 20s
+    interval: 10s
     initialDelay: 10s
-    count: 3
+    count: 2
     successCondition: "result[0] >= 0.98"
-    failureLimit: 2
+    failureLimit: 1
     provider:
       prometheus:
         address: "{{ .Values.rollout.analysisTemplate.prometheus.address }}"
         timeout: 10
-
         query: |
           sum(rate(http_client_external_api_requests_total{
             namespace="{{ .Release.Namespace }}",

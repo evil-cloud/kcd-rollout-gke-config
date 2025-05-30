@@ -8,9 +8,9 @@ spec:
   - name: rollout-pod-hash
   metrics:
   - name: cb-state
-    interval: 15s
+    interval: 10s
     initialDelay: 5s
-    count: 3
+    count: 2
     successCondition: "result[0] != 1"
     failureLimit: 1
 

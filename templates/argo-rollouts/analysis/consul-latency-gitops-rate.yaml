@@ -9,11 +9,11 @@ spec:
 
   metrics:
   - name: external-api-latency-p95
-    interval: 20s
+    interval: 10s
     initialDelay: 10s
-    count: 5
+    count: 2
     successCondition: "result[0] < 1.0"
-    failureLimit: 2
+    failureLimit: 1
 
     provider:
       prometheus:
