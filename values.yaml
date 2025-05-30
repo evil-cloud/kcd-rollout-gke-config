@@ -14,7 +14,7 @@ serviceAccount:
 image:
   repository: d4rkghost47/gitops-api-gke
   pullPolicy: IfNotPresent
-  tag: "latest"
+  tag: "5e0f9b2d"
 imagePullSecrets: []
 podAnnotations:
   prometheus.io/scrape: "true"
@@ -231,7 +231,6 @@ rollout:
   analysisTemplate:
     prometheus:
       address: "http://prometheus-ui.monitoring.svc.cluster.local:9090"
-
   spec:
     steps:
     - setWeight: 1
@@ -245,7 +244,6 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
-
     - setWeight: 50
     - pause:
         duration: 40s
@@ -258,7 +256,6 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
-
     - setWeight: 75
     - pause:
         duration: 40s
@@ -272,5 +269,4 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
-            
     - setWeight: 100
