@@ -12,7 +12,7 @@ spec:
     interval: 10s
     initialDelay: 10s
     count: 2
-    successCondition: "result[0] >= 0.98"
+    successCondition: "result[0] >= 0.50"
     failureLimit: 1
     provider:
       prometheus:

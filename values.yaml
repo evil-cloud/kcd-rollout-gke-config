@@ -246,7 +246,7 @@ rollout:
             podTemplateHashValue: Latest
     - setWeight: 50
     - pause:
-        duration: 40s
+        duration: 50s
     - analysis:
         templates:
         - templateName: general-success-rate
