@@ -237,7 +237,6 @@ rollout:
     - analysis:
         templates:
         - templateName: check-jsonplaceholder-api-rate
-
     - setWeight: 50
     - pause:
         duration: 10s
