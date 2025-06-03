@@ -237,16 +237,10 @@ rollout:
     - analysis:
         templates:
         - templateName: check-jsonplaceholder-api-rate
-    - analysis:
-        templates:
-        - templateName: general-success-rate
-        args:
-        - name: rollout-pod-hash
-          valueFrom:
-            podTemplateHashValue: Latest
+
     - setWeight: 50
     - pause:
-        duration: 50s
+        duration: 10s
     - analysis:
         templates:
         - templateName: general-success-rate
@@ -256,9 +250,11 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
+    - pause:
+        duration: 10s
     - setWeight: 75
     - pause:
-        duration: 40s
+        duration: 10s
     - analysis:
         templates:
         - templateName: general-success-rate
@@ -269,4 +265,6 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
+    - pause:
+        duration: 10s
     - setWeight: 100
