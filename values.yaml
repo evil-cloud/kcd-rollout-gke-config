@@ -239,12 +239,10 @@ rollout:
         - templateName: check-jsonplaceholder-api-rate
     - setWeight: 50
     - pause:
-        duration: 10s
+        duration: 50s
     - analysis:
         templates:
         - templateName: general-success-rate
-        - templateName: external-api-success-rate
-        - templateName: external-api-latency-p95
         args:
         - name: rollout-pod-hash
           valueFrom:
@@ -253,7 +251,7 @@ rollout:
         duration: 10s
     - setWeight: 75
     - pause:
-        duration: 10s
+        duration: 30s
     - analysis:
         templates:
         - templateName: general-success-rate
