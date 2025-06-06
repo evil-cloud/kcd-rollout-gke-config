@@ -170,11 +170,6 @@ istio:
         perTryTimeout: 5s
         retryOn: "gateway-error,connect-failure,refused-stream"
       timeout: 5s
-      fault:
-        delay:
-          percentage:
-            value: 0.1
-          fixedDelay: 5s
       corsPolicy:
         allowOrigins:
         - exact: "*"
@@ -239,20 +234,12 @@ rollout:
     - setWeight: 25
     - pause:
         duration: 20s
-    - analysis:
-        templates:
-        - templateName: general-success-rate
-        args:
-        - name: rollout-pod-hash
-          valueFrom:
-            podTemplateHashValue: Latest
     - setWeight: 50
     - pause:
         duration: 20s
     - analysis:
         templates:
         - templateName: general-success-rate
-        - templateName: external-api-success-rate
         args:
         - name: rollout-pod-hash
           valueFrom:
