@@ -233,10 +233,10 @@ rollout:
         - templateName: check-jsonplaceholder-api-rate
     - setWeight: 10
     - pause:
-        duration: 50s
+        duration: 30s
     - setWeight: 50
     - pause:
-        duration: 40s
+        duration: 30s
     - analysis:
         templates:
         - templateName: general-success-rate
@@ -245,7 +245,7 @@ rollout:
           valueFrom:
             podTemplateHashValue: Latest
     - pause:
-        duration: 30s
+        duration: 20s
     - setWeight: 70
     - analysis:
         templates:
