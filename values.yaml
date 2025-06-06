@@ -234,7 +234,6 @@ rollout:
     - setWeight: 10
     - pause:
         duration: 50s
-
     - setWeight: 50
     - pause:
         duration: 40s
@@ -245,7 +244,6 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
-
     - pause:
         duration: 30s
     - setWeight: 70
@@ -257,5 +255,4 @@ rollout:
         - name: rollout-pod-hash
           valueFrom:
             podTemplateHashValue: Latest
-            
     - setWeight: 100
