@@ -20,20 +20,6 @@ spec:
 
   strategy:
     canary:
-      canaryMetadata:
-        annotations:
-          role: canary
-        labels:
-          role: canary
-          version: canary
-
-      stableMetadata:
-        annotations:
-          role: stable
-        labels:
-          role: stable
-          version: stable
-
       canaryService: {{ include "generic-rollout.fullname" . }}-canary
       stableService: {{ include "generic-rollout.fullname" . }}-stable
       trafficRouting:
