@@ -4,8 +4,8 @@ fullnameOverride: "devops-api"
 autoscaling:
   minReplicas: 1
   maxReplicas: 20
-  targetCPUUtilizationPercentage: 80
-  targetMemoryUtilizationPercentage: 80
+  targetCPUUtilizationPercentage: 90
+  targetMemoryUtilizationPercentage: 90
 serviceAccount:
   create: true
   automount: false
