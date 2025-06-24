@@ -3,7 +3,7 @@ nameOverride: "devops-api"
 fullnameOverride: "devops-api"
 autoscaling:
   minReplicas: 1
-  maxReplicas: 20
+  maxReplicas: 1
   targetCPUUtilizationPercentage: 90
   targetMemoryUtilizationPercentage: 90
 serviceAccount:
@@ -232,8 +232,7 @@ rollout:
         templates:
         - templateName: check-jsonplaceholder-api-rate
     - setWeight: 10
-    - pause:
-        duration: 30s
+    - pause: {}
     - setWeight: 50
     - pause:
         duration: 30s
